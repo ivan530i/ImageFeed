@@ -3,7 +3,6 @@ import WebKit
 
 final class SplashViewController: UIViewController {
     private let ShowAuthenticationScreenSegueIdentifier = "ShowAuthenticationScreen"
-    
     private let oauth2Service = OAuth2Service.shared
     private let oauth2TokenStorage = OAuth2TokenStorage()
     
@@ -46,7 +45,8 @@ extension SplashViewController: AuthViewControllerDelegate {
     private func fetchOAuthToken(_ code: String) {
         oauth2Service.fetchOAuthToken(with: code) { [weak self] result in
             switch result {
-            case .success:
+            case .success(let accessToken):
+                self?.oauth2TokenStorage.token = accessToken
                 self?.switchToTabBarController()
             case .failure(let error):
                 print("Error fetching OAuth token: \(error)")

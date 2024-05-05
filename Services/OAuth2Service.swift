@@ -1,6 +1,4 @@
 import Foundation
-import UIKit
-import WebKit
 
 final class OAuth2Service {
     static let shared = OAuth2Service()
@@ -8,6 +6,11 @@ final class OAuth2Service {
     let tokenStorage = OAuth2TokenStorage()
     
     private init() {}
+    
+    private (set) var authToken: String? {
+        get { tokenStorage.token }
+        set { tokenStorage.token = newValue }
+    }
     
     func fetchOAuthToken(with code: String, completion: @escaping (Result<String, Error>) -> Void) {
         guard let request = makeTokenRequest(with: code) else {
@@ -59,7 +62,11 @@ final class OAuth2Service {
             return nil
         }
         
-        let bodyParams: [String: Any] = [
+        let accessKey = Constants.accessKey
+        let secretKey = Constants.secretKey
+        let redirectURI = Constants.redirectURI
+        
+        let params: [String: Any] = [
             "client_id": accessKey,
             "client_secret": secretKey,
             "redirect_uri": redirectURI,
@@ -67,18 +74,18 @@ final class OAuth2Service {
             "grant_type": "authorization_code"
         ]
         
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = "POST"
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
         do {
-            request.httpBody = try JSONSerialization.data(withJSONObject: bodyParams, options: [])
-            return request
+            urlRequest.httpBody = try JSONSerialization.data(withJSONObject: params, options: [])
+            return urlRequest
         } catch {
             print("Error creating token request: \(error)")
             return nil
         }
     }
 }
-
 
