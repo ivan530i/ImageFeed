@@ -1,59 +1,75 @@
 import Foundation
+import ProgressHUD
+
+enum AuthServiceError: Error {
+    case invalidRequest
+}
 
 final class OAuth2Service {
+    private let urlSession = URLSession.shared
+    private var task: URLSessionTask?
+    private var lastCode: String?
+    
     static let shared = OAuth2Service()
     
     let tokenStorage = OAuth2TokenStorage()
     
     private init() {}
     
-    private (set) var authToken: String? {
+    var authToken: String? {
         get { tokenStorage.token }
         set { tokenStorage.token = newValue }
     }
     
-    func fetchOAuthToken(with code: String, completion: @escaping (Result<String, Error>) -> Void) {
+    func fetchOAuthToken(_ code: String, completion: @escaping (Result<String, Error>) -> Void) {
+        assert(Thread.isMainThread)
+        
+        if task != nil {
+            if lastCode != code {
+                task?.cancel()
+            } else {
+                let errorMessage = "Invalid request - duplicate code"
+                print("[OAuth2Service.fetchOAuthToken]: \(errorMessage)")
+                completion(.failure(AuthServiceError.invalidRequest))
+                return
+            }
+        }
+        
+        lastCode = code
+        
         guard let request = makeTokenRequest(with: code) else {
-            let error = NSError(domain: "OAuth2Service", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to create token request."])
-            completion(.failure(NetworkError.urlRequestError(error)))
+            let errorMessage = "Invalid request - failed to create URL request"
+            print("[OAuth2Service.fetchOAuthToken]: \(errorMessage)")
+            completion(.failure(AuthServiceError.invalidRequest))
             return
         }
         
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                completion(.failure(NetworkError.urlRequestError(error)))
-                return
+        task = urlSession.objectTask(for: request) { [weak self] (result: Result<OAuthTokenResponseBody, Error>) in
+            guard let self = self else { return }
+            
+            defer {
+                DispatchQueue.main.async {
+                    self.task = nil
+                    self.lastCode = nil
+                }
             }
             
-            guard let httpResponse = response as? HTTPURLResponse else {
-                completion(.failure(NetworkError.urlSessionError))
-                return
-            }
-            
-            guard (200..<300).contains(httpResponse.statusCode) else {
-                completion(.failure(NetworkError.httpStatusCode(httpResponse.statusCode)))
-                return
-            }
-            
-            guard let data = data else {
-                completion(.failure(NetworkError.urlSessionError))
-                return
-            }
-            
-            do {
-                let tokenResponse = try JSONDecoder().decode(OAuthTokenResponseBody.self, from: data)
+            switch result {
+            case .success(let tokenResponse):
                 let accessToken = tokenResponse.accessToken
-                self.tokenStorage.token = accessToken
+                self.authToken = accessToken
                 DispatchQueue.main.async {
                     completion(.success(accessToken))
                 }
-            } catch {
-                print("Error decoding token response: \(error)")
+            case .failure(let error):
+                print("[OAuth2Service.fetchOAuthToken]: \(error.localizedDescription)")
                 DispatchQueue.main.async {
                     completion(.failure(error))
                 }
             }
-        }.resume()
+        }
+        
+        task?.resume()
     }
     
     private func makeTokenRequest(with code: String) -> URLRequest? {
@@ -74,7 +90,6 @@ final class OAuth2Service {
             "grant_type": "authorization_code"
         ]
         
-        
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = "POST"
         urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -88,4 +103,3 @@ final class OAuth2Service {
         }
     }
 }
-

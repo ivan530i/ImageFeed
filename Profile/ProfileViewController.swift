@@ -1,6 +1,13 @@
 import UIKit
+import ProgressHUD
+import Kingfisher
 
 final class ProfileViewController: UIViewController {
+    private let profileService = ProfileService.shared
+    var profile: Profile?
+    
+    private var profileImageServiceObserver: NSObjectProtocol?
+    
     private lazy var profileImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.image = UIImage(named: "Photo")
@@ -11,7 +18,6 @@ final class ProfileViewController: UIViewController {
     private let nameLabel: UILabel = {
         let label = UILabel()
         label.textColor = .white
-        label.text = "Екатерина Новикова"
         label.font = UIFont.systemFont(ofSize: 23, weight: .bold)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -20,7 +26,6 @@ final class ProfileViewController: UIViewController {
     private let loginLabel: UILabel = {
         let label = UILabel()
         label.textColor = .gray
-        label.text = "@ekaterina_nov"
         label.font = UIFont.systemFont(ofSize: 13)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -29,7 +34,6 @@ final class ProfileViewController: UIViewController {
     private let descriptionLabel: UILabel = {
         let label = UILabel()
         label.textColor = .white
-        label.text = "Hello, World!"
         label.font = UIFont.systemFont(ofSize: 13)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -47,6 +51,17 @@ final class ProfileViewController: UIViewController {
         
         setupViews()
         setupConstraints()
+        updateProfileDetails()
+        
+        profileImageServiceObserver = NotificationCenter.default.addObserver(
+                   forName: ProfileImageService.didChangeNotification,
+                   object: nil,
+                   queue: .main
+               ) { [weak self] _ in
+                   guard let self = self else { return }
+                   self.updateAvatar()
+               }
+               updateAvatar()
     }
     
     private func setupViews() {
@@ -78,9 +93,24 @@ final class ProfileViewController: UIViewController {
         ])
     }
     
+    private func updateProfileDetails() {
+        guard let profile = profileService.profile else {
+                    print("No profile data available")
+                    return
+                }
+                nameLabel.text = profile.name
+                loginLabel.text = profile.loginName
+                descriptionLabel.text = profile.bio
+    }
+    
+    private func updateAvatar() {
+            guard let profileImageURL = ProfileImageService.shared.avatarURL else { return }
+            
+            profileImageView.kf.setImage(with: URL(string: profileImageURL))
+        }
+    
     @objc
     private func didTapLogoutButton() {
-        
+    
     }
 }
-
