@@ -26,15 +26,22 @@ final class ProfileImageService {
         
         let request = profileImageRequest(token: token, username: username)
         
-        task = urlSession.objectTask(for: request) { [weak self] (result: Result<UserResult, Error>) in
+        task = urlSession.objectTask(for: request) { [weak self] (result: Result<ProfileResult, Error>) in
             guard let self = self else { return }
             switch result {
             case .success(let userResult):
-                let avatarUrl = userResult.profileImage?.small
+                guard let avatarUrl = userResult.profileImage?.large else {
+                    print("Error: [ProfileImageService] image is nill")
+                    completion(.failure(NetworkError.imageError))
+                    return
+                }
+                
                 self.avatarURL = avatarUrl
                 DispatchQueue.main.async {
-                    completion(.success(avatarUrl ?? ""))
-                    NotificationCenter.default.post(name: ProfileImageService.didChangeNotification, object: self, userInfo: ["URL": avatarUrl])
+                    completion(.success(avatarUrl))
+                    NotificationCenter.default.post(name: ProfileImageService.didChangeNotification,
+                                                    object: self,
+                                                    userInfo: ["URL": avatarUrl])
                 }
             case .failure(let error):
                 print("[ProfileImageService.fetchProfileImageURL]: \(error.localizedDescription)")

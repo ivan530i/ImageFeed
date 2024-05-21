@@ -7,6 +7,7 @@ final class ProfileService {
     private var task: URLSessionTask?
     private var isLoading = false
     private(set) var profile: Profile?
+    private let profileImageServices = ProfileImageService.shared
     
     private init() {}
     
@@ -30,10 +31,13 @@ final class ProfileService {
         
         task = URLSession.shared.objectTask(for: request) { [weak self] (result: Result<ProfileResult, Error>) in
             defer { self?.isLoading = false }
+            guard let self = self else { return }
             switch result {
             case .success(let profileResult):
                 let profile = Profile(profile: profileResult)
-                self?.profile = profile
+                self.profile = profile
+                
+                profileImageServices.fetchProfileImageURL(username: profile.username) {_ in }
                 completion(.success(profile))
             case .failure(let error):
                 print("[ProfileService.fetchProfile]: \(error.localizedDescription)")

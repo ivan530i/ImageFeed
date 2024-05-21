@@ -1,5 +1,5 @@
 import Foundation
 
-struct UserResult: Decodable {
+struct UserResult: Codable {
     let profileImage: ProfileImage?
 }
