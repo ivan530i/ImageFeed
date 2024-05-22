@@ -8,7 +8,7 @@ enum AuthServiceError: Error {
 final class OAuth2Service {
     private let urlSession = URLSession.shared
     private var task: URLSessionTask?
-    private var lastCode: String?
+    private var ongoingCode: String?
     
     static let shared = OAuth2Service()
     
@@ -24,18 +24,19 @@ final class OAuth2Service {
     func fetchOAuthToken(_ code: String, completion: @escaping (Result<String, Error>) -> Void) {
         assert(Thread.isMainThread)
         
-        if task != nil {
-            if lastCode != code {
-                task?.cancel()
-            } else {
+        if let existingTask = task {
+            if ongoingCode == code {
+                
                 let errorMessage = "Invalid request - duplicate code"
                 print("[OAuth2Service.fetchOAuthToken]: \(errorMessage)")
                 completion(.failure(AuthServiceError.invalidRequest))
                 return
+            } else {
+                existingTask.cancel()
             }
         }
         
-        lastCode = code
+        ongoingCode = code
         
         guard let request = makeTokenRequest(with: code) else {
             let errorMessage = "Invalid request - failed to create URL request"
@@ -50,7 +51,7 @@ final class OAuth2Service {
             defer {
                 DispatchQueue.main.async {
                     self.task = nil
-                    self.lastCode = nil
+                    self.ongoingCode = nil
                 }
             }
             
