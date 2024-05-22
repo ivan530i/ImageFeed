@@ -1,5 +1,4 @@
 import UIKit
-import ProgressHUD
 import Kingfisher
 
 final class ProfileViewController: UIViewController {
@@ -54,14 +53,14 @@ final class ProfileViewController: UIViewController {
         updateProfileDetails()
         
         profileImageServiceObserver = NotificationCenter.default.addObserver(
-                   forName: ProfileImageService.didChangeNotification,
-                   object: nil,
-                   queue: .main
-               ) { [weak self] _ in
-                   guard let self = self else { return }
-                   self.updateAvatar()
-               }
-               updateAvatar()
+            forName: ProfileImageService.didChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.updateAvatar()
+        }
+        
+        updateAvatar()
     }
     
     private func setupViews() {
@@ -95,22 +94,27 @@ final class ProfileViewController: UIViewController {
     
     private func updateProfileDetails() {
         guard let profile = profileService.profile else {
-                    print("No profile data available")
-                    return
-                }
-                nameLabel.text = profile.name
-                loginLabel.text = profile.loginName
-                descriptionLabel.text = profile.bio
+            print("No profile data available")
+            return
+        }
+        
+        nameLabel.text = profile.name
+        loginLabel.text = profile.loginName
+        descriptionLabel.text = profile.bio
     }
     
     private func updateAvatar() {
-            guard let profileImageURL = ProfileImageService.shared.avatarURL else { return }
-            
-            profileImageView.kf.setImage(with: URL(string: profileImageURL))
+        guard let profileImageURL = ProfileImageService.shared.avatarURL else { return }
+        
+        if let url = URL(string: profileImageURL) {
+            profileImageView.kf.setImage(with: url)
+        } else {
+            print("Invalid URL for profile image")
         }
+    }
     
     @objc
     private func didTapLogoutButton() {
-    
+
     }
 }

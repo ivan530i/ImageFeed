@@ -1,9 +1,9 @@
-import UIKit
+import Foundation
 
 final class ProfileImageService {
-    
     static let shared = ProfileImageService()
     static let didChangeNotification = Notification.Name(rawValue: "ProfileImageProviderDidChange")
+    
     private var task: URLSessionTask?
     private let urlSession = URLSession.shared
     private let oauthToken = OAuth2TokenStorage().token
@@ -11,14 +11,8 @@ final class ProfileImageService {
     
     private init() {}
     
-    func fetchProfileImageURL(
-        username: String,
-        _ completion: @escaping (Result<String, Error>) -> Void
-    ) {
+    func fetchProfileImageURL(username: String, _ completion: @escaping (Result<String, Error>) -> Void) {
         assert(Thread.isMainThread)
-        if task != nil {
-            return
-        }
         
         task?.cancel()
         
@@ -31,7 +25,7 @@ final class ProfileImageService {
             switch result {
             case .success(let userResult):
                 guard let avatarUrl = userResult.profileImage?.large else {
-                    print("Error: [ProfileImageService] image is nill")
+                    print("Error: [ProfileImageService] image is nil")
                     completion(.failure(NetworkError.imageError))
                     return
                 }
@@ -39,9 +33,11 @@ final class ProfileImageService {
                 self.avatarURL = avatarUrl
                 DispatchQueue.main.async {
                     completion(.success(avatarUrl))
-                    NotificationCenter.default.post(name: ProfileImageService.didChangeNotification,
-                                                    object: self,
-                                                    userInfo: ["URL": avatarUrl])
+                    NotificationCenter.default.post(
+                        name: ProfileImageService.didChangeNotification,
+                        object: self,
+                        userInfo: ["URL": avatarUrl]
+                    )
                 }
             case .failure(let error):
                 print("[ProfileImageService.fetchProfileImageURL]: \(error.localizedDescription)")
