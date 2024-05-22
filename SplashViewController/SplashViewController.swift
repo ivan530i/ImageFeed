@@ -59,15 +59,14 @@ final class SplashViewController: UIViewController {
     private func fetchProfile(_ token: String) {
         UIBlockingProgressHUD.show()
         profileService.fetchProfile(token) { [weak self] result in
-            guard let self = self else { return }
             DispatchQueue.main.async {
                 UIBlockingProgressHUD.dismiss()
                 switch result {
                 case .success(let profile):
-                    self.oauth2TokenStorage.token = token
-                    self.fetchProfileCompletion(.success(profile))
+                    self?.fetchProfileCompletion(.success(profile))
                 case .failure(let error):
                     print("Error fetching profile: \(error)")
+                    self?.switchToAuthViewController()
                 }
             }
         }
@@ -77,19 +76,13 @@ final class SplashViewController: UIViewController {
         switch result {
         case .success(let profile):
             DispatchQueue.main.async {
-                let username = profile.username
-                ProfileImageService.shared.fetchProfileImageURL(username: username) { _ in }
-                let storyboard = UIStoryboard(name: "Main", bundle: nil)
-                if let tabBarController = storyboard.instantiateViewController(withIdentifier: "TabBarViewController") as? UITabBarController,
-                   let profileViewController = tabBarController.viewControllers?.first as? ProfileViewController {
-                    profileViewController.profile = profile
-                    UIApplication.shared.windows.first?.rootViewController = tabBarController
-                }
+                ProfileImageService.shared.fetchProfileImageURL(username: profile.username) { _ in }
+                self.switchToTabBarController()
             }
         case .failure(let error):
             DispatchQueue.main.async {
                 print("Error fetching profile: \(error)")
-                UIBlockingProgressHUD.dismiss()
+                self.switchToAuthViewController()
             }
         }
     }
@@ -104,17 +97,16 @@ extension SplashViewController: AuthViewControllerDelegate {
     
     private func fetchOAuthToken(_ code: String) {
         oauth2Service.fetchOAuthToken(code) { [weak self] result in
-                guard let self = self else { return }
-                DispatchQueue.main.async {
-                    switch result {
-                    case .success(let accessToken):
-                        self.oauth2TokenStorage.token = accessToken
-                        self.fetchProfile(accessToken)
-                    case .failure(let error):
-                        print("Error fetching OAuth token: \(error)")
-                        UIBlockingProgressHUD.dismiss()
-                    }
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let accessToken):
+                    self?.oauth2TokenStorage.token = accessToken
+                    self?.fetchProfile(accessToken)
+                case .failure(let error):
+                    print("Error fetching OAuth token: \(error)")
+                    self?.switchToAuthViewController()
                 }
             }
         }
     }
+}

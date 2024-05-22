@@ -8,7 +8,6 @@ protocol AuthViewControllerDelegate: AnyObject {
 final class AuthViewController: UIViewController {
     weak var delegate: AuthViewControllerDelegate?
     private let showWebViewSegueIdentifier = "ShowWebView"
-    private let oauth2Service = OAuth2Service.shared
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == showWebViewSegueIdentifier {
@@ -31,37 +30,19 @@ final class AuthViewController: UIViewController {
     }
     
     func showErrorAlert() {
-            let alertController = UIAlertController(title: "Что-то пошло не так", message: "Не удалось войти в систему", preferredStyle: .alert)
-            alertController.addAction(UIAlertAction(title: "Ок", style: .default, handler: nil))
-            present(alertController, animated: true, completion: nil)
-        }
+        let alertController = UIAlertController(title: "Что-то пошло не так", message: "Не удалось войти в систему", preferredStyle: .alert)
+        alertController.addAction(UIAlertAction(title: "Ок", style: .default, handler: nil))
+        present(alertController, animated: true, completion: nil)
+    }
 }
 
 extension AuthViewController: WebViewViewControllerDelegate {
     func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {
         vc.dismiss(animated: true)
-        
-        ProgressHUD.show()
-        oauth2Service.fetchOAuthToken(code) { [weak self] result in
-            ProgressHUD.dismiss()
-            
-            switch result {
-            case .success(let accessToken):
-                print("Access token obtained: \(accessToken)")
-                self?.delegate?.authViewController(self!, didAuthenticateWithCode: accessToken)
-            case .failure(let error):
-                print("Failed to obtain access token: \(error)")
-                if let decodingError = error as? DecodingError {
-                    print("Decoding Error: \(decodingError)")
-                } else {
-                    self?.showErrorAlert()
-                }
-            }
-        }
+        delegate?.authViewController(self, didAuthenticateWithCode: code)
     }
 
     func webViewViewControllerDidCancel(_ vc: WebViewViewController) {
         dismiss(animated: true)
     }
 }
-
