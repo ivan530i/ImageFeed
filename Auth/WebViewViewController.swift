@@ -1,7 +1,6 @@
 import UIKit
 import Foundation
 import WebKit
-import ProgressHUD
 
 fileprivate let unsplashAuthorizeURLString = "https://unsplash.com/oauth/authorize"
 
@@ -29,7 +28,7 @@ final class WebViewViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-                observeWebViewProgress()
+        observeWebViewProgress()
     }
     
     @IBAction private func tapBackButton(_ sender: Any?) {
@@ -38,19 +37,19 @@ final class WebViewViewController: UIViewController {
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-                estimatedProgressObservation?.invalidate()
-                estimatedProgressObservation = nil
+        estimatedProgressObservation?.invalidate()
+        estimatedProgressObservation = nil
     }
     
     
     private func observeWebViewProgress() {
-            estimatedProgressObservation = webView.observe(
-                \.estimatedProgress,
-                options: [],
-                changeHandler: { [weak self] _, _ in
-                    self?.updateProgress()
-                })
-        }
+        estimatedProgressObservation = webView.observe(
+            \.estimatedProgress,
+             options: [],
+             changeHandler: { [weak self] _, _ in
+                 self?.updateProgress()
+             })
+    }
     
     private func updateProgress() {
         progressView.progress = Float(webView.estimatedProgress)

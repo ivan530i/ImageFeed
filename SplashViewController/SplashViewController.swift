@@ -5,14 +5,14 @@ final class SplashViewController: UIViewController {
     private let oauth2Service = OAuth2Service.shared
     private let oauth2TokenStorage = OAuth2TokenStorage()
     private let profileService = ProfileService.shared
-
+    
     private let logo: UIImageView = {
         let logo = UIImageView()
         logo.image = UIImage(named: "splash_screen_logo")
         logo.translatesAutoresizingMaskIntoConstraints = false
         return logo
     }()
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
@@ -36,7 +36,7 @@ final class SplashViewController: UIViewController {
             logo.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
     }
-
+    
     private func switchToTabBarController() {
         guard let window = UIApplication.shared.windows.first else {
             fatalError("Invalid Configuration")
@@ -45,17 +45,17 @@ final class SplashViewController: UIViewController {
             .instantiateViewController(withIdentifier: "TabBarViewController")
         window.rootViewController = tabBarController
     }
-
+    
     private func switchToAuthViewController() {
         guard let authViewController = UIStoryboard(name: "Main", bundle: .main)
-                .instantiateViewController(withIdentifier: "AuthViewController") as? AuthViewController else {
+            .instantiateViewController(withIdentifier: "AuthViewController") as? AuthViewController else {
             fatalError("Invalid Configuration")
         }
         authViewController.delegate = self
         authViewController.modalPresentationStyle = .fullScreen
         present(authViewController, animated: true)
     }
-
+    
     private func fetchProfile(_ token: String) {
         UIBlockingProgressHUD.show()
         profileService.fetchProfile(token) { [weak self] result in
@@ -71,7 +71,7 @@ final class SplashViewController: UIViewController {
             }
         }
     }
-
+    
     private func fetchProfileCompletion(_ result: Result<Profile, Error>) {
         switch result {
         case .success(let profile):
