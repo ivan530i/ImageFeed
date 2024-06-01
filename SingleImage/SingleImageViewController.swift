@@ -1,15 +1,9 @@
 import UIKit
+import Kingfisher
 
 final class SingleImageViewController: UIViewController {
-    var image: UIImage? {
-        didSet {
-            guard isViewLoaded, let image else { return }
-            
-            imageView.image = image
-            imageView.frame.size = image.size
-            rescaleAndCenterImageInScrollView(image: image)
-        }
-    }
+    
+    var imageUrl: URL?
     
     @IBOutlet private var scrollView: UIScrollView!
     @IBOutlet private var imageView: UIImageView!
@@ -19,24 +13,27 @@ final class SingleImageViewController: UIViewController {
         scrollView.minimumZoomScale = 0.1
         scrollView.maximumZoomScale = 1.25
         
-        guard let image else { return }
-        imageView.image = image
-        imageView.frame.size = image.size
-        rescaleAndCenterImageInScrollView(image: image)
-    }
+        if let imageUrl = imageUrl {
+                    imageView.kf.setImage(with: imageUrl, completionHandler: { [weak self] result in
+                        switch result {
+                        case .success(let value):
+                            self?.rescaleAndCenterImageInScrollView(image: value.image)
+                        case .failure(let error):
+                            print("Error loading image: \(error)")
+                        }
+                    })
+                }
+            }
     
     @IBAction private func didTapBackButton() {
         dismiss(animated: true, completion: nil)
     }
     
     @IBAction func didTapShareButton(_ sender: UIButton) {
-        guard let image else { return }
-        let share = UIActivityViewController(
-            activityItems: [image],
-            applicationActivities: nil
-        )
-        present(share, animated: true, completion: nil)
-    }
+        guard let image = imageView.image else { return }
+                let share = UIActivityViewController(activityItems: [image], applicationActivities: nil)
+                present(share, animated: true, completion: nil)
+            }
     
     private func rescaleAndCenterImageInScrollView(image: UIImage) {
         let minZoomScale = scrollView.minimumZoomScale

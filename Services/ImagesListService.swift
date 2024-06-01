@@ -37,7 +37,6 @@ final class ImagesListService {
             }
             
             do {
-                
                 let photoResults = try JSONDecoder().decode([PhotoResult].self, from: data)
                 
                 DispatchQueue.main.async {
@@ -49,7 +48,7 @@ final class ImagesListService {
                                 createdAt: self.formatISODateString($0.createdAt),
                                 welcomeDescription: $0.description,
                                 thumbImageURL: $0.urls.thumb,
-                                largeImageURL: $0.urls.full,
+                                largeImageURL: $0.urls.full, 
                                 isLiked: $0.likedByUser
                             )
                         )
@@ -70,9 +69,8 @@ final class ImagesListService {
         task?.resume()
     }
     
-    
     private func getImagesListRequest(page: Int) -> URLRequest? {
-        var components = URLComponents(string: "https://api.unsplash.com/photos?page=(page)")
+        var components = URLComponents(string: "https://api.unsplash.com/photos")
         components?.queryItems = [
             URLQueryItem(name: "page", value: "\(page)"),
             URLQueryItem(name: "per_page", value: "10"),
