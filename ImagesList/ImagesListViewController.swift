@@ -1,6 +1,7 @@
 import UIKit
 
-final class ImagesListViewController: UIViewController {
+final class ImagesListViewController: UIViewController, ImagesListCellDelegate {
+    
     private let showSingleImageSegueIdentifier = "ShowSingleImage"
     private let service = ImagesListService.shared
     private let imageListService = ImagesListService.shared
@@ -23,7 +24,7 @@ final class ImagesListViewController: UIViewController {
         tableView.rowHeight = 200
         tableView.contentInset = UIEdgeInsets(top: 12, left: 0, bottom: 12, right: 0)
         NotificationCenter.default.addObserver(self, selector: #selector(updateTableViewAnimated), name: ImagesListService.didChangeNotification, object: nil)
-
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -32,22 +33,22 @@ final class ImagesListViewController: UIViewController {
     }
     
     @objc private func updateTableViewAnimated() {
-            let oldCount = photos.count
-            let newCount = imageListService.photos.count
-            photos = imageListService.photos
-            if oldCount != newCount {
-                tableView.performBatchUpdates {
-                    let indexPaths = (oldCount..<newCount).map { i in
-                        IndexPath(row: i, section: 0)
-                    }
-                    tableView.insertRows(at: indexPaths, with: .automatic)
-                } completion: { _ in }
-            }
+        let oldCount = photos.count
+        let newCount = imageListService.photos.count
+        photos = imageListService.photos
+        if oldCount != newCount {
+            tableView.performBatchUpdates {
+                let indexPaths = (oldCount..<newCount).map { i in
+                    IndexPath(row: i, section: 0)
+                }
+                tableView.insertRows(at: indexPaths, with: .automatic)
+            } completion: { _ in }
         }
+    }
     
     deinit {
-            NotificationCenter.default.removeObserver(self)
-        }
+        NotificationCenter.default.removeObserver(self)
+    }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == showSingleImageSegueIdentifier {
@@ -64,6 +65,35 @@ final class ImagesListViewController: UIViewController {
             viewController.imageUrl = URL(string: photo.largeImageURL)
         } else {
             super.prepare(for: segue, sender: sender)
+        }
+    }
+    
+    private func showLikeError(error: Error) {
+        let alert = UIAlertController(title: "Error", message: "Failed to change like status: \(error.localizedDescription)", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
+    }
+    
+    func imageListCellDidTapLike(_ cell: ImagesListCell) {
+        guard let indexPath = tableView.indexPath(for: cell) else { return }
+        let photo = photos[indexPath.row]
+        
+        UIBlockingProgressHUD.show()
+        
+        imageListService.changeLike(photoId: photo.id, isLike: !photo.isLiked) { [weak self] result in
+            guard let self = self else { return }
+            
+            DispatchQueue.main.async {
+                UIBlockingProgressHUD.dismiss()
+                
+                switch result {
+                case .success:
+                    self.photos = self.imageListService.photos
+                    cell.setIsLiked(self.photos[indexPath.row].isLiked)
+                case .failure(let error):
+                    self.showLikeError(error: error)
+                }
+            }
         }
     }
 }
@@ -86,7 +116,7 @@ extension ImagesListViewController: UITableViewDelegate {
         let cellHeight = photo.size.height * scale + imageInsets.top + imageInsets.bottom
         return cellHeight
     }
-
+    
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         if indexPath.row == photos.count - 1 {
@@ -110,6 +140,8 @@ extension ImagesListViewController: UITableViewDataSource {
 extension ImagesListViewController {
     func configCell(for cell: ImagesListCell, with indexPath: IndexPath) {
         let photo = photos[indexPath.row]
+        
+        cell.delegate = self
         
         cell.cellImage.kf.indicatorType = .activity
         cell.cellImage.kf.setImage(

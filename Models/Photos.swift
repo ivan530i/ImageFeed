@@ -1,11 +1,11 @@
 import Foundation
 
 struct Photo {
-    let id: String
-    let size: CGSize
-    let createdAt: Date?
-    let welcomeDescription: String?
-    let thumbImageURL: String
-    let largeImageURL: String
-    let isLiked: Bool
+    var id: String
+    var size: CGSize
+    var createdAt: Date?
+    var welcomeDescription: String?
+    var thumbImageURL: String
+    var largeImageURL: String
+    var isLiked: Bool
 }
