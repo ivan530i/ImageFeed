@@ -62,7 +62,7 @@ final class ImagesListViewController: UIViewController, ImagesListCellDelegate {
             }
             
             let photo = photos[indexPath.row]
-            viewController.imageUrl = URL(string: photo.largeImageURL)
+            viewController.imageUrl = URL(string: photo.fullImageURL)
         } else {
             super.prepare(for: segue, sender: sender)
         }

@@ -1,5 +1,6 @@
 import UIKit
 import Kingfisher
+import ProgressHUD
 
 final class SingleImageViewController: UIViewController {
     
@@ -13,17 +14,29 @@ final class SingleImageViewController: UIViewController {
         scrollView.minimumZoomScale = 0.1
         scrollView.maximumZoomScale = 1.25
         
-        if let imageUrl = imageUrl {
-                    imageView.kf.setImage(with: imageUrl, completionHandler: { [weak self] result in
-                        switch result {
-                        case .success(let value):
-                            self?.rescaleAndCenterImageInScrollView(image: value.image)
-                        case .failure(let error):
-                            print("Error loading image: \(error)")
-                        }
-                    })
-                }
+        loadImage()
             }
+    
+    private func loadImage() {
+            guard let imageUrl = imageUrl else { return }
+            
+            ProgressHUD.show()
+            
+            imageView.kf.setImage(with: imageUrl, completionHandler: { [weak self] result in
+                
+                ProgressHUD.dismiss()
+                
+                guard let self = self else { return }
+                
+                switch result {
+                case .success(let value):
+                    self.rescaleAndCenterImageInScrollView(image: value.image)
+                case .failure(let error):
+                    print("Error loading image: \(error)")
+                    self.showError()
+                }
+            })
+        }
     
     @IBAction private func didTapBackButton() {
         dismiss(animated: true, completion: nil)
@@ -51,7 +64,16 @@ final class SingleImageViewController: UIViewController {
         let y = (newContentSize.height - visibleRectSize.height) / 2
         scrollView.setContentOffset(CGPoint(x: x, y: y), animated: false)
     }
-}
+    
+    private func showError() {
+            let alert = UIAlertController(title: "Ошибка", message: "Что-то пошло не так. Попробовать ещё раз?", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "Не надо", style: .default))
+            alert.addAction(UIAlertAction(title: "Повторить", style: .default) { [weak self] _ in
+                self?.loadImage()
+            })
+            present(alert, animated: true)
+        }
+    }
 
 extension SingleImageViewController: UIScrollViewDelegate {
     func viewForZooming(in scrollView: UIScrollView) -> UIView? {

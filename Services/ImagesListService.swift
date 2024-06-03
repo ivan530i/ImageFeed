@@ -49,6 +49,7 @@ final class ImagesListService {
                                 welcomeDescription: $0.description,
                                 thumbImageURL: $0.urls.thumb,
                                 largeImageURL: $0.urls.full,
+                                fullImageURL: $0.urls.full,
                                 isLiked: $0.likedByUser
                             )
                         )
@@ -99,6 +100,7 @@ final class ImagesListService {
                     welcomeDescription: photo.welcomeDescription,
                     thumbImageURL: photo.thumbImageURL,
                     largeImageURL: photo.largeImageURL,
+                    fullImageURL: photo.fullImageURL,
                     isLiked: isLike
                 )
                 
