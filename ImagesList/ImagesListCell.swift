@@ -1,4 +1,5 @@
 import UIKit
+import Kingfisher
 
 protocol ImagesListCellDelegate: AnyObject {
     func imageListCellDidTapLike(_ cell: ImagesListCell)
@@ -21,6 +22,8 @@ final class ImagesListCell: UITableViewCell {
             super.prepareForReuse()
             cellImage.kf.cancelDownloadTask()
             cellImage.image = nil
+        dateLabel.text = nil
+                likeButton.setImage(nil, for: .normal)
         }
     
     func setIsLiked(_ isLiked: Bool) {

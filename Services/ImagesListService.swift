@@ -48,7 +48,7 @@ final class ImagesListService {
                                 createdAt: self.formatISODateString($0.createdAt),
                                 welcomeDescription: $0.description,
                                 thumbImageURL: $0.urls.thumb,
-                                largeImageURL: $0.urls.full,
+                                largeImageURL: $0.urls.regular,
                                 fullImageURL: $0.urls.full,
                                 isLiked: $0.likedByUser
                             )
