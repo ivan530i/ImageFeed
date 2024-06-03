@@ -10,6 +10,10 @@ final class ImagesListService {
     
     private init() {}
     
+    func clearAll() {
+        photos.removeAll()
+    }
+    
     func fetchPhotosNextPage() {
         assert(Thread.isMainThread)
         

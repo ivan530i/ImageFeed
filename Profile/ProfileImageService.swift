@@ -50,6 +50,10 @@ final class ProfileImageService {
         task?.resume()
     }
     
+    func setAvatarURL(_ url: String) {
+        self.avatarURL = url
+    }
+    
     private func profileImageRequest(token: String, username: String) -> URLRequest {
         guard let url = URL(string: "https://api.unsplash.com/users/\(username)") else {
             fatalError("Failed to create URL")
@@ -58,5 +62,9 @@ final class ProfileImageService {
         request.httpMethod = "GET"
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         return request
+    }
+
+    func clearAvatarURL() {
+        avatarURL = nil
     }
 }
