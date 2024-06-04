@@ -29,6 +29,7 @@ final class ProfileLogoutService {
 
    private func clearProfileImage() {
       ProfileImageService.shared.clearAvatarURL()
+       OAuth2Service.shared.clearToken()
    }
 
    private func clearImageList() {

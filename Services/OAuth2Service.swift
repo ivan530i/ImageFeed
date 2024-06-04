@@ -103,4 +103,8 @@ final class OAuth2Service {
             return nil
         }
     }
+    
+    func clearToken() {
+            tokenStorage.token = nil
+        }
 }
