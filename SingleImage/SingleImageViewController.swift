@@ -12,31 +12,33 @@ final class SingleImageViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         scrollView.minimumZoomScale = 0.1
-        scrollView.maximumZoomScale = 1.25
-        
+                scrollView.maximumZoomScale = 1.25
+        scrollView.delegate = self
         loadImage()
             }
     
     private func loadImage() {
-            guard let imageUrl = imageUrl else { return }
+        guard let imageUrl = imageUrl else { return }
+        
+        ProgressHUD.show()
+        
+        imageView.kf.setImage(with: imageUrl, completionHandler: { [weak self] result in
             
-            ProgressHUD.show()
+            ProgressHUD.dismiss()
             
-            imageView.kf.setImage(with: imageUrl, completionHandler: { [weak self] result in
+            guard let self = self else { return }
+            
+            switch result {
+            case .success(let value):
+                self.imageView.frame.size = value.image.size
                 
-                ProgressHUD.dismiss()
-                
-                guard let self = self else { return }
-                
-                switch result {
-                case .success(let value):
-                    self.rescaleAndCenterImageInScrollView(image: value.image)
-                case .failure(let error):
-                    print("Error loading image: \(error)")
-                    self.showError()
-                }
-            })
-        }
+                self.rescaleAndCenterImageInScrollView(image: value.image)
+            case .failure(let error):
+                print("Error loading image: \(error)")
+                self.showError()
+            }
+        })
+    }
     
     @IBAction private func didTapBackButton() {
         dismiss(animated: true, completion: nil)
@@ -49,21 +51,21 @@ final class SingleImageViewController: UIViewController {
             }
     
     private func rescaleAndCenterImageInScrollView(image: UIImage) {
-        let minZoomScale = scrollView.minimumZoomScale
-        let maxZoomScale = scrollView.maximumZoomScale
-        view.layoutIfNeeded()
-        let visibleRectSize = scrollView.bounds.size
-        let imageSize = image.size
-        let hScale = visibleRectSize.width / imageSize.width
-        let vScale = visibleRectSize.height / imageSize.height
-        let scale = min(maxZoomScale, max(minZoomScale, min(hScale, vScale)))
-        scrollView.setZoomScale(scale, animated: false)
-        scrollView.layoutIfNeeded()
-        let newContentSize = scrollView.contentSize
-        let x = (newContentSize.width - visibleRectSize.width) / 2
-        let y = (newContentSize.height - visibleRectSize.height) / 2
-        scrollView.setContentOffset(CGPoint(x: x, y: y), animated: false)
-    }
+            let minZoomScale = scrollView.minimumZoomScale
+            let maxZoomScale = scrollView.maximumZoomScale
+            view.layoutIfNeeded()
+            let visibleRectSize = scrollView.bounds.size
+            let imageSize = image.size
+            let hScale = visibleRectSize.width / imageSize.width
+            let vScale = visibleRectSize.height / imageSize.height
+            let scale = min(maxZoomScale, max(minZoomScale, max(hScale, vScale)))
+            scrollView.setZoomScale(scale, animated: false)
+            scrollView.layoutIfNeeded()
+            let newContentSize = scrollView.contentSize
+            let x = (newContentSize.width - visibleRectSize.width) / 2
+            let y = (newContentSize.height - visibleRectSize.height) / 2
+            scrollView.setContentOffset(CGPoint(x: x, y: y), animated: false)
+        }
     
     private func showError() {
             let alert = UIAlertController(title: "Ошибка", message: "Что-то пошло не так. Попробовать ещё раз?", preferredStyle: .alert)
