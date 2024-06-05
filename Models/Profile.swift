@@ -14,6 +14,5 @@ struct Profile {
         loginName = "@\(profile.username)"
         bio = profile.bio
     }
-    
 }
 

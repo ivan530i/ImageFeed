@@ -19,15 +19,15 @@ final class ImagesListCell: UITableViewCell {
     }
     
     override func prepareForReuse() {
-            super.prepareForReuse()
-            cellImage.kf.cancelDownloadTask()
-            cellImage.image = nil
+        super.prepareForReuse()
+        cellImage.kf.cancelDownloadTask()
+        cellImage.image = nil
         dateLabel.text = nil
-                likeButton.setImage(nil, for: .normal)
-        }
+        likeButton.setImage(nil, for: .normal)
+    }
     
     func setIsLiked(_ isLiked: Bool) {
-            let likeImage = isLiked ? UIImage(named: "like_button_on") : UIImage(named: "like_button_off")
-            likeButton.setImage(likeImage, for: .normal)
-        }
+        let likeImage = isLiked ? UIImage(named: "like_button_on") : UIImage(named: "like_button_off")
+        likeButton.setImage(likeImage, for: .normal)
+    }
 }
