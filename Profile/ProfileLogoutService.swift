@@ -1,9 +1,10 @@
 import Foundation
 import WebKit
+import UIKit
 
 final class ProfileLogoutService {
     static let shared = ProfileLogoutService()
-  
+    
     private init() { }
 
     func logout() {
@@ -11,7 +12,7 @@ final class ProfileLogoutService {
         clearProfileData()
         clearProfileImage()
         clearImageList()
-        switchToAuthViewController()
+        switchToSplashViewController()
     }
 
     private func cleanCookies() {
@@ -36,12 +37,12 @@ final class ProfileLogoutService {
         ImagesListService.shared.clearAll()
     }
 
-    private func switchToAuthViewController() {
+    private func switchToSplashViewController() {
         guard let window = UIApplication.shared.windows.first else {
             fatalError("Invalid Configuration")
         }
-        let authViewController = UIStoryboard(name: "Main", bundle: .main)
-            .instantiateViewController(withIdentifier: "AuthViewController")
-        window.rootViewController = authViewController
+        let splashViewController = UIStoryboard(name: "Main", bundle: .main)
+            .instantiateViewController(withIdentifier: "SplashViewController") as! SplashViewController
+        window.rootViewController = splashViewController
     }
 }
