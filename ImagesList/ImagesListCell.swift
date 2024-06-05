@@ -26,6 +26,12 @@ final class ImagesListCell: UITableViewCell {
         likeButton.setImage(nil, for: .normal)
     }
     
+    override func awakeFromNib() {
+            super.awakeFromNib()
+            cellImage.layer.cornerRadius = 10
+            cellImage.clipsToBounds = true
+        }
+    
     func setIsLiked(_ isLiked: Bool) {
         let likeImage = isLiked ? UIImage(named: "like_button_on") : UIImage(named: "like_button_off")
         likeButton.setImage(likeImage, for: .normal)
