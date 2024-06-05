@@ -122,7 +122,7 @@ final class ProfileViewController: UIViewController {
         )
 
         let cancelAction = UIAlertAction(title: "Отмена", style: .cancel)
-        let confirmAction = UIAlertAction(title: "Выйти", style: .destructive) { _ in
+        let confirmAction = UIAlertAction(title: "Выйти", style: .destructive) { [weak self] _ in
             ProfileLogoutService.shared.logout()
         }
 
@@ -130,5 +130,13 @@ final class ProfileViewController: UIViewController {
         alertController.addAction(confirmAction)
 
         present(alertController, animated: true)
+    }
+
+    private func switchToSplashViewController() {
+        guard let window = UIApplication.shared.windows.first else {
+            fatalError("Invalid Configuration")
+        }
+        window.rootViewController = SplashViewController()
+        window.makeKeyAndVisible()
     }
 }

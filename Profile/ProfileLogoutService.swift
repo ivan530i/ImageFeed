@@ -41,8 +41,7 @@ final class ProfileLogoutService {
         guard let window = UIApplication.shared.windows.first else {
             fatalError("Invalid Configuration")
         }
-        let splashViewController = UIStoryboard(name: "Main", bundle: .main)
-            .instantiateViewController(withIdentifier: "SplashViewController") as! SplashViewController
-        window.rootViewController = splashViewController
+        window.rootViewController = SplashViewController()
+        window.makeKeyAndVisible()
     }
 }
