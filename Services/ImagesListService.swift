@@ -1,7 +1,7 @@
 import UIKit
 
 final class ImagesListService {
-    private (set) var photos: [Photo] = []
+    private(set) var photos: [Photo] = []
     static let didChangeNotification = Notification.Name(rawValue: "ImagesListServiceDidChange")
     private var task: URLSessionTask?
     private var lastPage = 1
@@ -12,6 +12,7 @@ final class ImagesListService {
     
     func clearAll() {
         photos.removeAll()
+        lastPage = 1
     }
     
     func fetchPhotosNextPage() {
@@ -22,7 +23,7 @@ final class ImagesListService {
         }
         
         guard let request = getImagesListRequest(page: lastPage) else {
-            print("Error creating request")
+            print("[ImagesListService.fetchPhotosNextPage]: [Invalid Request] Failed to create request for page \(lastPage)")
             return
         }
         
@@ -31,12 +32,12 @@ final class ImagesListService {
             self.task = nil
             
             if let error = error {
-                print("Error: \(error)")
+                print("[ImagesListService.fetchPhotosNextPage]: [Network Error] \(error.localizedDescription) for request \(request)")
                 return
             }
             
             guard let data = data else {
-                print("No data received")
+                print("[ImagesListService.fetchPhotosNextPage]: [No Data] No data received for request \(request)")
                 return
             }
             
@@ -67,7 +68,7 @@ final class ImagesListService {
                     self.lastPage += 1
                 }
             } catch {
-                print("Error decoding JSON: \(error)")
+                print("[ImagesListService.fetchPhotosNextPage]: [Decoding Error] \(error.localizedDescription) for data \(String(describing: String(data: data, encoding: .utf8)))")
             }
         }
         
@@ -77,6 +78,8 @@ final class ImagesListService {
     func changeLike(photoId: String, isLike: Bool, _ completion: @escaping (Result<Void, Error>) -> Void) {
         let urlString = "https://api.unsplash.com/photos/\(photoId)/like"
         guard let url = URL(string: urlString) else {
+            let errorMessage = "Invalid URL for photoId \(photoId)"
+            print("[ImagesListService.changeLike]: [Invalid URL] \(errorMessage)")
             completion(.failure(NSError(domain: "Invalid URL", code: 0, userInfo: nil)))
             return
         }
@@ -89,6 +92,7 @@ final class ImagesListService {
             guard let self = self else { return }
             
             if let error = error {
+                print("[ImagesListService.changeLike]: [Network Error] \(error.localizedDescription) for request \(request)")
                 DispatchQueue.main.async {
                     completion(.failure(error))
                 }
@@ -118,6 +122,8 @@ final class ImagesListService {
                     completion(.success(()))
                 }
             } else {
+                let errorMessage = "Photo with ID \(photoId) not found"
+                print("[ImagesListService.changeLike]: [Photo Not Found] \(errorMessage)")
                 DispatchQueue.main.async {
                     completion(.failure(NSError(domain: "Photo not found", code: 0, userInfo: nil)))
                 }
@@ -135,7 +141,10 @@ final class ImagesListService {
             URLQueryItem(name: "client_id", value: "UtikJ6aDHAwv8C_JVCEbQLQJ7ldEw_D3LVCSYvRfiyI")
         ]
         
-        guard let url = components?.url else { return nil }
+        guard let url = components?.url else {
+            print("[ImagesListService.getImagesListRequest]: [Invalid URL] Failed to create URL for page \(page)")
+            return nil
+        }
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         return request

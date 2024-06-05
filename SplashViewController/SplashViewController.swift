@@ -16,6 +16,7 @@ final class SplashViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        NotificationCenter.default.addObserver(self, selector: #selector(updateAvatar), name: ProfileImageService.didChangeNotification, object: nil)
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -85,6 +86,11 @@ final class SplashViewController: UIViewController {
                 self.switchToAuthViewController()
             }
         }
+    }
+    
+    @objc private func updateAvatar() {
+        guard let profileImageURL = ProfileImageService.shared.avatarURL else { return }
+        print("Avatar URL updated: \(profileImageURL)")
     }
 }
 

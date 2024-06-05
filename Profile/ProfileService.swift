@@ -38,22 +38,22 @@ final class ProfileService {
                 self.profile = profile
                 
                 ProfileImageService.shared.fetchProfileImageURL(username: profile.username) { result in
-                                switch result {
-                                case .success(let avatarURL):
-                                    self.profileImageServices.setAvatarURL(avatarURL)
-                                    completion(.success(profile))
-                                case .failure(let error):
-                                    completion(.failure(error))
-                                }
-                            }
-                        case .failure(let error):
-                            print("[ProfileService.fetchProfile]: \(error.localizedDescription)")
-                            completion(.failure(error))
-                        }
+                    switch result {
+                    case .success(let avatarURL):
+                        self.profileImageServices.setAvatarURL(avatarURL)
+                        completion(.success(profile))
+                    case .failure(let error):
+                        completion(.failure(error))
                     }
-
-                    task?.resume()
                 }
+            case .failure(let error):
+                print("[ProfileService.fetchProfile]: \(error.localizedDescription)")
+                completion(.failure(error))
+            }
+        }
+        
+        task?.resume()
+    }
     
     private func makeRequest(with token: String) -> URLRequest? {
         guard let url = URL(string: "https://api.unsplash.com/me") else {
@@ -68,6 +68,6 @@ final class ProfileService {
     }
     
     func clearProfile() {
-            profile = nil
-        }
+        profile = nil
+    }
 }
