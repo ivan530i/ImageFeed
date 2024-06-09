@@ -7,17 +7,11 @@ final class ProfileService {
     private var task: URLSessionTask?
     private var isLoading = false
     private(set) var profile: Profile?
-    private let profileImageServices = ProfileImageService.shared
     
     private init() {}
     
     func fetchProfile(_ token: String, completion: @escaping (Result<Profile, Error>) -> Void) {
         assert(Thread.isMainThread)
-        if profile != nil {
-            completion(.success(profile!))
-            return
-        }
-        
         task?.cancel()
         
         guard let request = makeRequest(with: token) else {
@@ -37,7 +31,10 @@ final class ProfileService {
                 let profile = Profile(profile: profileResult)
                 self.profile = profile
                 
-                profileImageServices.fetchProfileImageURL(username: profile.username) {_ in }
+                if let avatarURL = profileResult.profileImage?.large {
+                    ProfileImageService.shared.setAvatarURL(avatarURL)
+                }
+                
                 completion(.success(profile))
             case .failure(let error):
                 print("[ProfileService.fetchProfile]: \(error.localizedDescription)")
@@ -58,5 +55,9 @@ final class ProfileService {
         request.httpMethod = "GET"
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         return request
+    }
+    
+    func clearProfile() {
+        profile = nil
     }
 }

@@ -16,6 +16,7 @@ final class SplashViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        NotificationCenter.default.addObserver(self, selector: #selector(updateAvatar), name: ProfileImageService.didChangeNotification, object: nil)
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -86,27 +87,15 @@ final class SplashViewController: UIViewController {
             }
         }
     }
+    
+    @objc private func updateAvatar() {
+        guard let profileImageURL = ProfileImageService.shared.avatarURL else { return }
+        print("Avatar URL updated: \(profileImageURL)")
+    }
 }
 
 extension SplashViewController: AuthViewControllerDelegate {
     func authViewController(_ vc: AuthViewController, didAuthenticateWithCode code: String) {
-        dismiss(animated: true) { [weak self] in
-            self?.fetchOAuthToken(code)
-        }
-    }
-    
-    private func fetchOAuthToken(_ code: String) {
-        oauth2Service.fetchOAuthToken(code) { [weak self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let accessToken):
-                    self?.oauth2TokenStorage.token = accessToken
-                    self?.fetchProfile(accessToken)
-                case .failure(let error):
-                    print("Error fetching OAuth token: \(error)")
-                    self?.switchToAuthViewController()
-                }
-            }
-        }
+        dismiss(animated: true)
     }
 }

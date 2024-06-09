@@ -3,14 +3,13 @@ import Kingfisher
 
 final class ProfileViewController: UIViewController {
     private let profileService = ProfileService.shared
-    var profile: Profile?
-    
     private var profileImageServiceObserver: NSObjectProtocol?
     
     private lazy var profileImageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.image = UIImage(named: "Photo")
         imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.layer.cornerRadius = 35
+        imageView.layer.masksToBounds = true
         return imageView
     }()
     
@@ -50,7 +49,7 @@ final class ProfileViewController: UIViewController {
         
         setupViews()
         setupConstraints()
-        updateProfileDetails()
+        fetchProfile()
         
         profileImageServiceObserver = NotificationCenter.default.addObserver(
             forName: ProfileImageService.didChangeNotification,
@@ -59,8 +58,6 @@ final class ProfileViewController: UIViewController {
         ) { [weak self] _ in
             self?.updateAvatar()
         }
-        
-        updateAvatar()
     }
     
     private func setupViews() {
@@ -92,12 +89,24 @@ final class ProfileViewController: UIViewController {
         ])
     }
     
-    private func updateProfileDetails() {
-        guard let profile = profileService.profile else {
-            print("No profile data available")
+    private func fetchProfile() {
+        guard let token = OAuth2TokenStorage().token else {
+            print("No token available")
             return
         }
         
+        profileService.fetchProfile(token) { [weak self] result in
+            switch result {
+            case .success(let profile):
+                self?.updateProfileDetails(with: profile)
+                self?.updateAvatar()
+            case .failure(let error):
+                print("Failed to fetch profile: \(error)")
+            }
+        }
+    }
+    
+    private func updateProfileDetails(with profile: Profile) {
         nameLabel.text = profile.name
         loginLabel.text = profile.loginName
         descriptionLabel.text = profile.bio
@@ -115,6 +124,28 @@ final class ProfileViewController: UIViewController {
     
     @objc
     private func didTapLogoutButton() {
+        let alertController = UIAlertController(
+            title: "Пока, пока!",
+            message: "Вы уверены, что хотите выйти?",
+            preferredStyle: .alert
+        )
         
+        let cancelAction = UIAlertAction(title: "Нет", style: .cancel)
+        let confirmAction = UIAlertAction(title: "Да", style: .destructive) { [weak self] _ in
+            ProfileLogoutService.shared.logout()
+        }
+        
+        alertController.addAction(cancelAction)
+        alertController.addAction(confirmAction)
+        
+        present(alertController, animated: true)
+    }
+    
+    private func switchToSplashViewController() {
+        guard let window = UIApplication.shared.windows.first else {
+            fatalError("Invalid Configuration")
+        }
+        window.rootViewController = SplashViewController()
+        window.makeKeyAndVisible()
     }
 }
