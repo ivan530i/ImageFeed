@@ -96,24 +96,6 @@ final class SplashViewController: UIViewController {
 
 extension SplashViewController: AuthViewControllerDelegate {
     func authViewController(_ vc: AuthViewController, didAuthenticateWithCode code: String) {
-        dismiss(animated: true) { [weak self] in
-            self?.fetchOAuthToken(code)
-        }
-    }
-    
-    private func fetchOAuthToken(_ code: String) {
-        oauth2Service.fetchOAuthToken(code) { [weak self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let accessToken):
-                    self?.oauth2TokenStorage.token = accessToken
-                    self?.fetchProfile(accessToken)
-                    self?.switchToTabBarController()
-                case .failure(let error):
-                    print("Error fetching OAuth token: \(error)")
-                    self?.switchToAuthViewController()
-                }
-            }
-        }
+        dismiss(animated: true)
     }
 }

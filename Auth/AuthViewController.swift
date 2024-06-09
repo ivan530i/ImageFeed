@@ -7,6 +7,8 @@ protocol AuthViewControllerDelegate: AnyObject {
 
 final class AuthViewController: UIViewController {
     weak var delegate: AuthViewControllerDelegate?
+    private let oauth2Service = OAuth2Service.shared
+    private let oauth2TokenStorage = OAuth2TokenStorage()
     private let showWebViewSegueIdentifier = "ShowWebView"
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -35,12 +37,31 @@ final class AuthViewController: UIViewController {
         alertController.addAction(UIAlertAction(title: "Ок", style: .default, handler: nil))
         present(alertController, animated: true, completion: nil)
     }
+    
+    private func fetchOAuthToken(_ code: String) {
+        UIBlockingProgressHUD.show()
+        oauth2Service.fetchOAuthToken(code) { [weak self] result in
+            DispatchQueue.main.async {
+                UIBlockingProgressHUD.dismiss()
+                switch result {
+                case .success(let accessToken):
+                    self?.oauth2TokenStorage.token = accessToken
+                    self?.dismiss(animated: true) {
+                        self?.delegate?.authViewController(self!, didAuthenticateWithCode: code)
+                    }
+                case .failure(let error):
+                    print("Error fetching OAuth token: \(error)")
+                    self?.showErrorAlert()
+                }
+            }
+        }
+    }
 }
 
 extension AuthViewController: WebViewViewControllerDelegate {
     func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {
         vc.dismiss(animated: true)
-        delegate?.authViewController(self, didAuthenticateWithCode: code)
+        fetchOAuthToken(code)
     }
     
     func webViewViewControllerDidCancel(_ vc: WebViewViewController) {
