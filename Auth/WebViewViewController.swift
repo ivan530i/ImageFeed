@@ -2,6 +2,13 @@ import UIKit
 import Foundation
 import WebKit
 
+public protocol WebViewViewControllerProtocol: AnyObject {
+    var presenter: WebViewPresenterProtocol? { get set }
+    func load(request: URLRequest)
+    func setProgressValue(_ newValue: Float)
+    func setProgressHidden(_ isHidden: Bool)
+}
+
 fileprivate let unsplashAuthorizeURLString = "https://unsplash.com/oauth/authorize"
 
 protocol WebViewViewControllerDelegate: AnyObject {
@@ -9,7 +16,13 @@ protocol WebViewViewControllerDelegate: AnyObject {
     func webViewViewControllerDidCancel(_ vc: WebViewViewController)
 }
 
-final class WebViewViewController: UIViewController {
+final class WebViewViewController: UIViewController & WebViewViewControllerProtocol {
+    
+    func load(request: URLRequest) {
+        webView.load(request)
+    }
+    
+    var presenter: WebViewPresenterProtocol?
     
     @IBOutlet private weak var webView: WKWebView!
     @IBOutlet private weak var progressView: UIProgressView!
@@ -21,9 +34,9 @@ final class WebViewViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        loadWebView()
         webView.navigationDelegate = self
         observeWebViewProgress()
+        presenter?.viewDidLoad()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -47,38 +60,27 @@ final class WebViewViewController: UIViewController {
             \.estimatedProgress,
              options: [],
              changeHandler: { [weak self] _, _ in
-                 self?.updateProgress()
+                 guard let newValue = self?.webView.estimatedProgress else { return }
+                 self?.presenter?.didUpdateProgressValue(newValue)
              })
     }
     
-    private func updateProgress() {
-        progressView.progress = Float(webView.estimatedProgress)
-        progressView.isHidden = fabs(webView.estimatedProgress - 1.0) <= 0.0001
+    func setProgressValue(_ newValue: Float) {
+        progressView.progress = newValue
     }
+    
+    func setProgressHidden(_ isHidden: Bool) {
+        progressView.isHidden = isHidden
+    }
+    
     private func code(from navigationAction: WKNavigationAction) -> String? {
-        if let url = navigationAction.request.url,
-           let urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false),
-           let codeItem = urlComponents.queryItems?.first(where: { $0.name == "code" }) {
-            return codeItem.value
+            if let url = navigationAction.request.url {
+                return presenter?.code(from: url)
+            }
+            return nil
         }
-        return nil
-    }
 }
 
-private extension WebViewViewController {
-    func loadWebView() {
-        var components = URLComponents(string: unsplashAuthorizeURLString)!
-        components.queryItems = [
-            URLQueryItem(name: "client_id", value: Constants.accessKey),
-            URLQueryItem(name: "redirect_uri", value: Constants.redirectURI),
-            URLQueryItem(name: "response_type", value: "code"),
-            URLQueryItem(name: "scope", value: Constants.accessScope)
-        ]
-        let url = components.url!
-        let request = URLRequest(url: url)
-        webView.load(request)
-    }
-}
 extension WebViewViewController: WKNavigationDelegate {
     func webView(
         _ webView: WKWebView,
