@@ -2,11 +2,11 @@ import Foundation
 
 final class ImagesListPresenter: ImagesListPresenterProtocol {
     weak var view: ImagesListViewProtocol?
-    private let imageListService: ImagesListService
+    private let imageListService: ImagesListServiceProtocol
     
     private(set) var photos: [Photo] = []
     
-    init(view: ImagesListViewProtocol, service: ImagesListService = .shared) {
+    init(view: ImagesListViewProtocol, service: ImagesListServiceProtocol = ImagesListService.shared) {
         self.view = view
         self.imageListService = service
         NotificationCenter.default.addObserver(self, selector: #selector(updatePhotos), name: ImagesListService.didChangeNotification, object: nil)
@@ -41,7 +41,7 @@ final class ImagesListPresenter: ImagesListPresenterProtocol {
         }
     }
     
-    @objc private func updatePhotos() {
+    @objc func updatePhotos() {
         photos = imageListService.photos
         view?.updateTableView()
     }
