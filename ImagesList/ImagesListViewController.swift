@@ -78,11 +78,12 @@ extension ImagesListViewController: UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        if indexPath.row == presenter.photos.count - 1 {
+        if indexPath.row + 1 == presenter.photos.count && !ProcessInfo.processInfo.arguments.contains("UITEST") {
             presenter.viewDidLoad()
         }
     }
 }
+
 
 extension ImagesListViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -127,6 +128,7 @@ extension ImagesListViewController {
         
         let likeImage = photo.isLiked ? UIImage(named: "like_button_on") : UIImage(named: "like_button_off")
         cell.likeButton.setImage(likeImage, for: .normal)
+        cell.likeButton.accessibilityIdentifier = "LikeButton"
     }
 }
 
