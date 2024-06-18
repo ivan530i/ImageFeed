@@ -59,6 +59,7 @@
 		2CDF40B42C20225D00823CEC /* ImagesListServiceStub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CDF40B32C20225D00823CEC /* ImagesListServiceStub.swift */; };
 		2CDF40B62C20229800823CEC /* ImagesListServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CDF40B52C20229800823CEC /* ImagesListServiceProtocol.swift */; };
 		2CDF40B72C20229800823CEC /* ImagesListServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CDF40B52C20229800823CEC /* ImagesListServiceProtocol.swift */; };
+		2CEA1DD82C20B2C200E3BD7E /* Photos.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CA2F8102C073AE200DD6B70 /* Photos.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -690,6 +691,7 @@
 				2CDF40B42C20225D00823CEC /* ImagesListServiceStub.swift in Sources */,
 				2CDF40B72C20229800823CEC /* ImagesListServiceProtocol.swift in Sources */,
 				2CDF40AB2C201E0300823CEC /* ImagesListPresenterTests.swift in Sources */,
+				2CEA1DD82C20B2C200E3BD7E /* Photos.swift in Sources */,
 				2CDF40B22C201E1E00823CEC /* ImagesListViewSpy.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
