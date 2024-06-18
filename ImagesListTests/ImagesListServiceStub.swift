@@ -1,8 +1,7 @@
-@testable import ImageFeed
 import Foundation
+@testable import ImageFeed
 
 class ImagesListServiceStub: ImagesListServiceProtocol {
-    
     var fetchPhotosNextPageCalled = false
     var changeLikeCalled = false
     private var _photos: [Photo] = []
@@ -21,10 +20,6 @@ class ImagesListServiceStub: ImagesListServiceProtocol {
     func changeLike(photoId: String, isLike: Bool, completion: @escaping (Result<Void, Error>) -> Void) {
         changeLikeCalled = true
         changeLikeCompletion = completion
-        
-        if let index = _photos.firstIndex(where: { $0.id == photoId }) {
-            _photos[index].isLiked = isLike
-        }
     }
     
     func setPhotos(_ photos: [Photo]) {

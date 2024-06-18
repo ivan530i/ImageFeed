@@ -1,5 +1,5 @@
+import Foundation
 @testable import ImageFeed
-import UIKit
 
 class ImagesListViewSpy: ImagesListViewProtocol {
     var updateTableViewCalled = false
@@ -15,4 +15,3 @@ class ImagesListViewSpy: ImagesListViewProtocol {
         errorMessage = message
     }
 }
-

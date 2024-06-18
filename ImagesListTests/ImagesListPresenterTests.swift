@@ -6,7 +6,7 @@ final class ImagesListPresenterTests: XCTestCase {
     func testViewDidLoadFetchesPhotos() {
         let view = ImagesListViewSpy()
         let service = ImagesListServiceStub()
-        let presenter = ImagesListPresenter(view: view)
+        let presenter = ImagesListPresenter(view: view, service: service)
         
         presenter.viewDidLoad()
         
@@ -16,7 +16,7 @@ final class ImagesListPresenterTests: XCTestCase {
     func testDidTapLikeButtonChangesLikeStatus() {
         let view = ImagesListViewSpy()
         let service = ImagesListServiceStub()
-        let presenter = ImagesListPresenter(view: view)
+        let presenter = ImagesListPresenter(view: view, service: service)
         
         let photo = Photo(id: "1", size: .zero, createdAt: nil, welcomeDescription: nil, thumbImageURL: "", largeImageURL: "", fullImageURL: "", isLiked: false)
         service.setPhotos([photo])
@@ -25,12 +25,12 @@ final class ImagesListPresenterTests: XCTestCase {
         presenter.didTapLikeButton(at: IndexPath(row: 0, section: 0))
         
         XCTAssertTrue(service.changeLikeCalled)
-    }
+    } 
     
     func testUpdatePhotosNotifiesView() {
         let view = ImagesListViewSpy()
         let service = ImagesListServiceStub()
-        let presenter = ImagesListPresenter(view: view)
+        let presenter = ImagesListPresenter(view: view, service: service)
         
         let photo = Photo(id: "1", size: .zero, createdAt: nil, welcomeDescription: nil, thumbImageURL: "", largeImageURL: "", fullImageURL: "", isLiked: false)
         service.setPhotos([photo])
@@ -44,7 +44,7 @@ final class ImagesListPresenterTests: XCTestCase {
     func testChangeLikeSuccessUpdatesPhotos() {
         let view = ImagesListViewSpy()
         let service = ImagesListServiceStub()
-        let presenter = ImagesListPresenter(view: view)
+        let presenter = ImagesListPresenter(view: view, service: service)
         
         let photo = Photo(id: "1", size: .zero, createdAt: nil, welcomeDescription: nil, thumbImageURL: "", largeImageURL: "", fullImageURL: "", isLiked: false)
         service.setPhotos([photo])
@@ -59,7 +59,7 @@ final class ImagesListPresenterTests: XCTestCase {
     func testChangeLikeFailureShowsError() {
         let view = ImagesListViewSpy()
         let service = ImagesListServiceStub()
-        let presenter = ImagesListPresenter(view: view)
+        let presenter = ImagesListPresenter(view: view, service: service)
         
         let photo = Photo(id: "1", size: .zero, createdAt: nil, welcomeDescription: nil, thumbImageURL: "", largeImageURL: "", fullImageURL: "", isLiked: false)
         service.setPhotos([photo])

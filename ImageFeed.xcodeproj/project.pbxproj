@@ -24,6 +24,14 @@
 		2C3ECC0C2BE7DA65009436A6 /* SplashViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C3ECC0B2BE7DA65009436A6 /* SplashViewController.swift */; };
 		2C5514E12BF1843800DBF58E /* UIBlockingProgressHUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C5514E02BF1843800DBF58E /* UIBlockingProgressHUD.swift */; };
 		2C5EB02C2BBDBBD200973B4E /* ImagesListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C5EB02B2BBDBBD200973B4E /* ImagesListCell.swift */; };
+		2C64C61E2C2224DF00E398BD /* ImagesListProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CA88FBD2C1E074A00B4229B /* ImagesListProtocol.swift */; };
+		2C64C61F2C2225A500E398BD /* ImagesListPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CA88FBF2C1E078900B4229B /* ImagesListPresenter.swift */; };
+		2C64C6202C22263200E398BD /* ImagesListService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C77E7572C0510D500714513 /* ImagesListService.swift */; };
+		2C64C6212C22264000E398BD /* UIBlockingProgressHUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C5514E02BF1843800DBF58E /* UIBlockingProgressHUD.swift */; };
+		2C64C6222C22273200E398BD /* PhotoResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CA2F80E2C0738FF00DD6B70 /* PhotoResult.swift */; };
+		2C64C6232C2228D400E398BD /* ImagesListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CC33CBE2BB596A1001A12D0 /* ImagesListViewController.swift */; };
+		2C64C6242C2228EC00E398BD /* ImagesListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C5EB02B2BBDBBD200973B4E /* ImagesListCell.swift */; };
+		2C64C6252C2228FD00E398BD /* SingleImageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C2E6CD52BD14C98001B85D6 /* SingleImageViewController.swift */; };
 		2C77E7582C0510D500714513 /* ImagesListService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C77E7572C0510D500714513 /* ImagesListService.swift */; };
 		2C7A79852BEF3D150068971B /* ProgressHUD in Frameworks */ = {isa = PBXBuildFile; productRef = 2C7A79842BEF3D150068971B /* ProgressHUD */; };
 		2C8D66C12C1B659500B75614 /* WebViewPresenterSpy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C8D66BF2C1B649F00B75614 /* WebViewPresenterSpy.swift */; };
@@ -688,11 +696,19 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2C64C6232C2228D400E398BD /* ImagesListViewController.swift in Sources */,
 				2CDF40B42C20225D00823CEC /* ImagesListServiceStub.swift in Sources */,
+				2C64C6222C22273200E398BD /* PhotoResult.swift in Sources */,
 				2CDF40B72C20229800823CEC /* ImagesListServiceProtocol.swift in Sources */,
 				2CDF40AB2C201E0300823CEC /* ImagesListPresenterTests.swift in Sources */,
+				2C64C6242C2228EC00E398BD /* ImagesListCell.swift in Sources */,
+				2C64C6252C2228FD00E398BD /* SingleImageViewController.swift in Sources */,
 				2CEA1DD82C20B2C200E3BD7E /* Photos.swift in Sources */,
 				2CDF40B22C201E1E00823CEC /* ImagesListViewSpy.swift in Sources */,
+				2C64C6202C22263200E398BD /* ImagesListService.swift in Sources */,
+				2C64C61F2C2225A500E398BD /* ImagesListPresenter.swift in Sources */,
+				2C64C61E2C2224DF00E398BD /* ImagesListProtocol.swift in Sources */,
+				2C64C6212C22264000E398BD /* UIBlockingProgressHUD.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

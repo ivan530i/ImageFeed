@@ -1,9 +1,10 @@
 import UIKit
+import Foundation
 
 final class ImagesListService: ImagesListServiceProtocol {
     private(set) var photos: [Photo] = []
     static let didChangeNotification = Notification.Name(rawValue: "ImagesListServiceDidChange")
-    private var task: URLSessionTask?
+    private var task: URLSessionDataTask?
     private var lastPage = 1
     static let shared: ImagesListServiceProtocol = ImagesListService()
     private let urlSession = URLSession.shared
