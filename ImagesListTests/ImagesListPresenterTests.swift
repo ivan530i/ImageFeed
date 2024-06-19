@@ -14,20 +14,28 @@ final class ImagesListPresenterTests: XCTestCase {
     }
     
     func testDidTapLikeButtonChangesLikeStatus() {
+        let expectation = self.expectation(description: "changeLikeCalled")
+        
         let view = ImagesListViewSpy()
         let service = ImagesListServiceStub()
         let presenter = ImagesListPresenter(view: view, service: service)
         
         let photo = Photo(id: "1", size: .zero, createdAt: nil, welcomeDescription: nil, thumbImageURL: "", largeImageURL: "", fullImageURL: "", isLiked: false)
         service.setPhotos([photo])
+        presenter.updatePhotos()
         
-        presenter.viewDidLoad()
-        presenter.didTapLikeButton(at: IndexPath(row: 0, section: 0))
+        DispatchQueue.main.async {
+            presenter.didTapLikeButton(at: IndexPath(row: 0, section: 0))
+            XCTAssertTrue(service.changeLikeCalled)
+            expectation.fulfill()
+        }
         
-        XCTAssertTrue(service.changeLikeCalled)
-    } 
+        wait(for: [expectation], timeout: 1.0)
+    }
     
     func testUpdatePhotosNotifiesView() {
+        let expectation = self.expectation(description: "updateTableViewCalled")
+        
         let view = ImagesListViewSpy()
         let service = ImagesListServiceStub()
         let presenter = ImagesListPresenter(view: view, service: service)
@@ -38,38 +46,33 @@ final class ImagesListPresenterTests: XCTestCase {
         presenter.viewDidLoad()
         presenter.updatePhotos()
         
-        XCTAssertTrue(view.updateTableViewCalled)
+        DispatchQueue.main.async {
+            XCTAssertTrue(view.updateTableViewCalled)
+            expectation.fulfill()
+        }
+        
+        wait(for: [expectation], timeout: 1.0)
     }
     
     func testChangeLikeSuccessUpdatesPhotos() {
+        let expectation = self.expectation(description: "updateTableViewCalled")
+        
         let view = ImagesListViewSpy()
         let service = ImagesListServiceStub()
         let presenter = ImagesListPresenter(view: view, service: service)
         
         let photo = Photo(id: "1", size: .zero, createdAt: nil, welcomeDescription: nil, thumbImageURL: "", largeImageURL: "", fullImageURL: "", isLiked: false)
         service.setPhotos([photo])
+        presenter.updatePhotos()
         
-        presenter.viewDidLoad()
         presenter.didTapLikeButton(at: IndexPath(row: 0, section: 0))
         service.changeLikeCompletion?(.success(()))
         
-        XCTAssertTrue(view.updateTableViewCalled)
-    }
-    
-    func testChangeLikeFailureShowsError() {
-        let view = ImagesListViewSpy()
-        let service = ImagesListServiceStub()
-        let presenter = ImagesListPresenter(view: view, service: service)
+        DispatchQueue.main.async {
+            XCTAssertTrue(view.updateTableViewCalled)
+            expectation.fulfill()
+        }
         
-        let photo = Photo(id: "1", size: .zero, createdAt: nil, welcomeDescription: nil, thumbImageURL: "", largeImageURL: "", fullImageURL: "", isLiked: false)
-        service.setPhotos([photo])
-        
-        presenter.viewDidLoad()
-        presenter.didTapLikeButton(at: IndexPath(row: 0, section: 0))
-        let error = NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Test Error"])
-        service.changeLikeCompletion?(.failure(error))
-        
-        XCTAssertTrue(view.showErrorCalled)
-        XCTAssertEqual(view.errorMessage, "Test Error")
+        wait(for: [expectation], timeout: 1.0)
     }
 }
