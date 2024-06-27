@@ -34,8 +34,12 @@ final class ProfileLogoutService {
     }
     
     private func clearImageList() {
-        ImagesListService.shared.clearAll()
+        guard let imagesListService = ImagesListService.shared as? ImagesListService else {
+            return
+        }
+        imagesListService.clearAll()
     }
+
     
     private func switchToSplashViewController() {
         guard let window = UIApplication.shared.windows.first else {

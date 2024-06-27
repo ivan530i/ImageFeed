@@ -1,9 +1,8 @@
 import UIKit
 import Kingfisher
 
-final class ProfileViewController: UIViewController {
-    private let profileService = ProfileService.shared
-    private var profileImageServiceObserver: NSObjectProtocol?
+final class ProfileViewController: UIViewController, ProfileViewProtocol {
+    private var presenter: ProfilePresenterProtocol!
     
     private lazy var profileImageView: UIImageView = {
         let imageView = UIImageView()
@@ -41,6 +40,7 @@ final class ProfileViewController: UIViewController {
         let button = UIButton.systemButton(with: UIImage(named: "Exit")!, target: self, action: #selector(didTapLogoutButton))
         button.tintColor = .red
         button.translatesAutoresizingMaskIntoConstraints = false
+        button.accessibilityIdentifier = "logout button"
         return button
     }()
     
@@ -49,15 +49,9 @@ final class ProfileViewController: UIViewController {
         
         setupViews()
         setupConstraints()
-        fetchProfile()
         
-        profileImageServiceObserver = NotificationCenter.default.addObserver(
-            forName: ProfileImageService.didChangeNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            self?.updateAvatar()
-        }
+        presenter = ProfilePresenter(view: self)
+        presenter.viewDidLoad()
     }
     
     private func setupViews() {
@@ -89,41 +83,17 @@ final class ProfileViewController: UIViewController {
         ])
     }
     
-    private func fetchProfile() {
-        guard let token = OAuth2TokenStorage().token else {
-            print("No token available")
-            return
-        }
-        
-        profileService.fetchProfile(token) { [weak self] result in
-            switch result {
-            case .success(let profile):
-                self?.updateProfileDetails(with: profile)
-                self?.updateAvatar()
-            case .failure(let error):
-                print("Failed to fetch profile: \(error)")
-            }
-        }
+    func showProfileDetails(name: String, login: String, bio: String) {
+        nameLabel.text = name
+        loginLabel.text = login
+        descriptionLabel.text = bio
     }
     
-    private func updateProfileDetails(with profile: Profile) {
-        nameLabel.text = profile.name
-        loginLabel.text = profile.loginName
-        descriptionLabel.text = profile.bio
+    func showProfileImage(url: URL) {
+        profileImageView.kf.setImage(with: url)
     }
     
-    private func updateAvatar() {
-        guard let profileImageURL = ProfileImageService.shared.avatarURL else { return }
-        
-        if let url = URL(string: profileImageURL) {
-            profileImageView.kf.setImage(with: url)
-        } else {
-            print("Invalid URL for profile image")
-        }
-    }
-    
-    @objc
-    private func didTapLogoutButton() {
+    func showLogoutConfirmation() {
         let alertController = UIAlertController(
             title: "Пока, пока!",
             message: "Вы уверены, что хотите выйти?",
@@ -132,7 +102,7 @@ final class ProfileViewController: UIViewController {
         
         let cancelAction = UIAlertAction(title: "Нет", style: .cancel)
         let confirmAction = UIAlertAction(title: "Да", style: .destructive) { [weak self] _ in
-            ProfileLogoutService.shared.logout()
+            self?.presenter.logout()
         }
         
         alertController.addAction(cancelAction)
@@ -141,11 +111,16 @@ final class ProfileViewController: UIViewController {
         present(alertController, animated: true)
     }
     
-    private func switchToSplashViewController() {
+    func switchToSplashViewController() {
         guard let window = UIApplication.shared.windows.first else {
             fatalError("Invalid Configuration")
         }
         window.rootViewController = SplashViewController()
         window.makeKeyAndVisible()
+    }
+    
+    @objc
+    private func didTapLogoutButton() {
+        presenter.didTapLogoutButton()
     }
 }
